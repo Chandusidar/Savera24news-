@@ -1,0 +1,63 @@
+{
+  "id": "/",
+  "name": "Savera 24 News - सवेरा 24 न्यूज़",
+  "short_name": "सवेरा 24",
+  "description": "सवेरा 24 न्यूज़ - सच की राह सवेरा के साथ। छत्तीसगढ़, महासमुंद और देश-विदेश की निष्पक्ष खबरें।",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#dc2626",
+  "background_color": "#ffffff",
+  "lang": "hi",
+  "dir": "ltr",
+  "categories": ["news", "magazines"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ताज़ा खबरें (Home)",
+      "url": "/?tab=home",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "ब्रेकिंग न्यूज़ (Breaking)",
+      "url": "/?tab=breaking",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "फोटो गैलरी (Photos)",
+      "url": "/?tab=photos",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "वीडियो न्यूज़ (Videos)",
+      "url": "/?tab=videos",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

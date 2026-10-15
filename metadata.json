@@ -1,0 +1,6 @@
+{
+  "name": "Savera 24 News - सवेरा 24 न्यूज़",
+  "description": "सवेरा 24 न्यूज़ - सच की राह सवेरा के साथ। छत्तीसगढ़, महासमुंद, पिथौरा, बसना और देश-विदेश की ताज़ा एवं निष्पक्ष खबरें।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

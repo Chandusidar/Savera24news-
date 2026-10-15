@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Yantramanav', 'Noto Sans Devanagari', -apple-system, sans-serif;
+    --font-editorial: 'Tiro Devanagari Hindi', 'Rozha One', Georgia, serif;
+    --color-primary: #dc2626;
+    --color-primary-dark: #991b1b;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Yantramanav', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* Devanagari Heading Utility */
+.font-devanagari-heading {
+  font-family: var(--font-heading);
+}
+
+.font-devanagari-editorial {
+  font-family: var(--font-editorial);
+}
+
+/* Safe area for Android and iOS home indicator */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 0px);
+}
+
+/* Article Reader HTML Content Styling */
+.article-rendered-content {
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: #1f2937;
+}
+
+.article-rendered-content p {
+  margin-bottom: 1.25rem;
+  text-align: justify;
+}
+
+.article-rendered-content h1,
+.article-rendered-content h2,
+.article-rendered-content h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
+  line-height: 1.35;
+}
+
+.article-rendered-content img {
+  border-radius: 0.75rem;
+  max-width: 100%;
+  height: auto;
+  margin: 1.25rem auto;
+  display: block;
+}
+
+.article-rendered-content iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+  margin: 1.25rem 0;
+  border: 0;
+}
+
+.article-rendered-content blockquote {
+  border-left: 4px solid #dc2626;
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.article-rendered-content a {
+  color: #dc2626;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Hide scrollbar for horizontal category filter */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
