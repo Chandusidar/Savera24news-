@@ -117,6 +117,18 @@ export const NewsCard: React.FC<NewsCardProps> = ({
           </button>
 
           <div className="flex items-center gap-1">
+            <a
+              href={article.originalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-slate-500 hover:text-red-600 hover:bg-slate-100 active:scale-95 transition-all"
+              title="मूल Blogger लेख खोलें"
+              aria-label="मूल Blogger लेख खोलें"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+
             <button
               type="button"
               onClick={handleShare}

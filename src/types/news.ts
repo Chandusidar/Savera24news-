@@ -74,6 +74,8 @@ export interface NewsArticle {
   originalUrl: string;
   isBreaking: boolean;
   videoData: VideoInfo | null;
+  wordCount: number;
+  readingTime: string;
 }
 
 export interface CategoryItem {

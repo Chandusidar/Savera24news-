@@ -2,6 +2,7 @@
  * Savera 24 News (सवेरा 24 न्यूज़)
  * Official News Application for https://www.savera24news.in/
  * "सच की राह सवेरा के साथ"
+ * Integrated with Blogger RSS 2.0 Feed (https://www.savera24news.in/feeds/posts/default?alt=rss)
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -17,9 +18,10 @@ import { BottomNav } from './components/BottomNav';
 import { SearchModal } from './components/SearchModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { PWAInstallModal } from './components/PWAInstallModal';
-import { fetchNewsFeed } from './services/bloggerApi';
+import { fetchBloggerRssFeed } from './services/bloggerRssService';
+import { FEED_CONFIG } from './config/feedConfig';
 import { NewsArticle, NavigationTab, APP_CATEGORIES } from './types/news';
-import { AlertCircle, RefreshCw, Flame, ChevronDown, WifiOff, Newspaper } from 'lucide-react';
+import { AlertCircle, RefreshCw, Flame, ChevronDown, Newspaper, Rss, ExternalLink } from 'lucide-react';
 
 export default function App() {
   // Navigation & View States
@@ -34,15 +36,15 @@ export default function App() {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFromCache, setIsFromCache] = useState<boolean>(false);
-  const [hasMore, setHasMore] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [feedSourceUrl, setFeedSourceUrl] = useState<string>(FEED_CONFIG.RSS_FEED_URL);
 
   // Modals
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
 
-  // Load news feed
-  const loadFeed = useCallback(
+  // Load news from Blogger RSS Feed
+  const loadRssFeed = useCallback(
     async (catId: string, query: string = '', isRefresh: boolean = false) => {
       if (isRefresh) {
         setIsRefreshing(true);
@@ -55,15 +57,14 @@ export default function App() {
         const catObj = APP_CATEGORIES.find((c) => c.id === catId);
         const bloggerCategory = catObj && catObj.id !== 'all' ? catObj.bloggerTag : undefined;
 
-        const result = await fetchNewsFeed({
+        const result = await fetchBloggerRssFeed({
           category: bloggerCategory,
-          startIndex: 1,
-          maxResults: 30,
           q: query || undefined,
+          limit: 35,
           forceRefresh: isRefresh
         });
 
-        // If 'breaking' tab is selected, filter strictly
+        // Filter strictly if 'breaking' tab is selected
         let finalArticles = result.articles;
         if (catId === 'breaking') {
           finalArticles = finalArticles.filter((a) => a.isBreaking);
@@ -71,9 +72,9 @@ export default function App() {
 
         setArticles(finalArticles);
         setIsFromCache(result.isFromCache);
-        setHasMore(result.articles.length >= 25);
+        setFeedSourceUrl(result.feedUrl);
       } catch (err: unknown) {
-        const errStr = err instanceof Error ? err.message : 'समाचार लोड करने में त्रुटि।';
+        const errStr = err instanceof Error ? err.message : 'समाचार लोड करने में त्रुटि। कृपया इंटरनेट कनेक्शन जांचें।';
         setErrorMessage(errStr);
       } finally {
         setIsLoading(false);
@@ -85,8 +86,8 @@ export default function App() {
 
   // Initial load
   useEffect(() => {
-    loadFeed(selectedCategory, searchQuery);
-  }, [loadFeed, selectedCategory, searchQuery]);
+    loadRssFeed(selectedCategory, searchQuery);
+  }, [loadRssFeed, selectedCategory, searchQuery]);
 
   // Handle URL param or browser back navigation
   useEffect(() => {
@@ -138,39 +139,7 @@ export default function App() {
 
   // Manual Refresh
   const handleRefresh = () => {
-    loadFeed(selectedCategory, searchQuery, true);
-  };
-
-  // Load More (Pagination)
-  const handleLoadMore = async () => {
-    if (isLoadingMore || !hasMore) return;
-    setIsLoadingMore(true);
-
-    try {
-      const catObj = APP_CATEGORIES.find((c) => c.id === selectedCategory);
-      const bloggerCategory = catObj && catObj.id !== 'all' ? catObj.bloggerTag : undefined;
-
-      const nextIndex = articles.length + 1;
-      const result = await fetchNewsFeed({
-        category: bloggerCategory,
-        startIndex: nextIndex,
-        maxResults: 20,
-        q: searchQuery || undefined
-      });
-
-      if (result.articles.length === 0) {
-        setHasMore(false);
-      } else {
-        setArticles((prev) => [...prev, ...result.articles]);
-        if (result.articles.length < 20) {
-          setHasMore(false);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load more articles:', err);
-    } finally {
-      setIsLoadingMore(false);
-    }
+    loadRssFeed(selectedCategory, searchQuery, true);
   };
 
   // Filtered breaking news items for ticker
@@ -203,7 +172,7 @@ export default function App() {
         onOpenInstallModal={() => setIsInstallModalOpen(true)}
       />
 
-      {/* 2. Breaking News Strip (Validated strictly; never fake) */}
+      {/* 2. Breaking News Strip (Validated strictly from RSS; never fake) */}
       <BreakingNewsTicker
         articles={articles}
         onSelectArticle={handleSelectArticle}
@@ -255,7 +224,7 @@ export default function App() {
                   सवेरा ब्रेकिंग न्यूज़
                 </h2>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  सत्यापित एवं प्रमाणित ताज़ा घटनाक्रम
+                  Blogger RSS से सत्यापित एवं प्रमाणित ताज़ा घटनाक्रम
                 </p>
               </div>
             </div>
@@ -290,30 +259,64 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab: HOME (FEED) */}
+        {/* Tab: HOME (LATEST NEWS FEED VIA BLOGGER RSS) */}
         {currentTab === 'home' && (
           <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-            {/* Active Category Title & Search Query Indicator */}
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            {/* Dedicated "ताज़ा खबरें (Latest News)" Section Header with RSS Badge */}
+            <div className="mb-5 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
                 <span className="w-2.5 h-6 bg-red-600 rounded-xs" />
-                <h2 className="text-lg sm:text-xl font-bold font-devanagari-heading text-slate-900">
-                  {searchQuery ? `खोज परिणाम: "${searchQuery}"` : currentCategoryObj?.hindiName || 'ताज़ा खबरें'}
-                </h2>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base sm:text-xl font-bold font-devanagari-heading text-slate-900">
+                      {searchQuery ? `खोज परिणाम: "${searchQuery}"` : currentCategoryObj?.hindiName || 'ताज़ा खबरें (Latest News)'}
+                    </h2>
+                    {/* RSS Live Source Indicator */}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 font-devanagari-heading">
+                      <Rss className="w-2.5 h-2.5 text-red-600" />
+                      <span>लाइव RSS</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                    सवेरा 24 न्यूज़ आधिकारिक ब्लॉगर RSS फीड से वास्तविक समय में अपडेटेड
+                  </p>
+                </div>
+              </div>
+
+              {/* Feed Info & RSS Source Link */}
+              <div className="flex items-center gap-2 ml-auto">
                 {isFromCache && (
-                  <span className="text-[11px] font-semibold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
                     कैश्ड
                   </span>
                 )}
+                {!isLoading && articles.length > 0 && (
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+                    {articles.length} खबरें
+                  </span>
+                )}
+                <a
+                  href={FEED_CONFIG.RSS_FEED_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden sm:inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-red-600 transition-colors p-1"
+                  title="Blogger XML RSS Feed खोलें"
+                >
+                  <span>RSS XML</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
 
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-xs text-red-600 font-semibold hover:underline"
-                >
-                  खोज हटाएं
-                </button>
+                <div className="w-full pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-slate-600">"{searchQuery}" के परिणाम</span>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-red-600 font-semibold hover:underline"
+                  >
+                    खोज फ़िल्टर हटाएं
+                  </button>
+                </div>
               )}
             </div>
 
@@ -339,7 +342,7 @@ export default function App() {
                   <AlertCircle className="w-7 h-7" />
                 </div>
                 <h3 className="font-devanagari-heading font-bold text-slate-900 text-lg">
-                  समाचार लोड नहीं हो सके
+                  RSS फीड लोड नहीं हो सकी
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                   {errorMessage}
@@ -350,10 +353,10 @@ export default function App() {
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs sm:text-sm shadow-md active:scale-95 transition-all"
                   >
                     <RefreshCw className="w-4 h-4" />
-                    <span>पुनः प्रयास करें</span>
+                    <span>पुनः प्रयास करें (Retry)</span>
                   </button>
                   <a
-                    href="https://www.savera24news.in/"
+                    href={FEED_CONFIG.WEBSITE_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-all"
@@ -372,7 +375,7 @@ export default function App() {
                   इस श्रेणी में कोई समाचार उपलब्ध नहीं है
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  इस समय इस क्षेत्र या विषय का कोई नया समाचार ब्लॉगर फीड में नहीं है।
+                  इस समय इस श्रेणी के लिए Blogger RSS फीड में कोई पोस्ट नहीं मिली है।
                 </p>
                 <button
                   onClick={() => handleCategorySelect('all')}
@@ -396,29 +399,6 @@ export default function App() {
                     />
                   ))}
                 </div>
-
-                {/* Load More Pagination */}
-                {hasMore && (
-                  <div className="text-center pt-4 pb-2">
-                    <button
-                      onClick={handleLoadMore}
-                      disabled={isLoadingMore}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-300 hover:border-red-400 hover:text-red-600 text-slate-700 text-xs sm:text-sm font-bold font-devanagari-heading shadow-xs active:scale-95 transition-all disabled:opacity-50"
-                    >
-                      {isLoadingMore ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin text-red-600" />
-                          <span>लोड हो रहा है...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>और समाचार देखें (Load More)</span>
-                          <ChevronDown className="w-4 h-4" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
               </div>
             )}
           </div>

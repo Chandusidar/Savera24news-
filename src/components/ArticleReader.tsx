@@ -196,23 +196,23 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
           dangerouslySetInnerHTML={{ __html: article.contentHtml }}
         />
 
-        {/* Official Article Link Card */}
+        {/* Official Blogger Article Link Card */}
         <div className="mt-8 p-4 sm:p-5 rounded-2xl bg-linear-to-r from-red-50 to-amber-50 border border-red-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h4 className="font-bold text-slate-900 font-devanagari-heading text-sm sm:text-base">
-              मूल समाचार एवं प्रतिक्रियाएं
+              मूल Blogger समाचार एवं प्रतिक्रियाएं
             </h4>
             <p className="text-xs text-slate-600 mt-0.5">
-              इस समाचार को सवेरा 24 न्यूज़ की आधिकारिक वेबसाइट पर पढ़ें।
+              इस समाचार को savera24news.in के मूल ब्लॉगर पोर्टल पर खोलें।
             </p>
           </div>
           <a
             href={article.originalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-semibold shadow-xs active:scale-95 transition-all shrink-0"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-red-600/20 active:scale-95 transition-all shrink-0"
           >
-            <span>मूल पोर्टल पर खोलें</span>
+            <span>मूल Blogger लेख खोलें</span>
             <ExternalLink className="w-4 h-4" />
           </a>
         </div>
