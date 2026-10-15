@@ -75,7 +75,3 @@ npm start
 ```
 
 ---
-
-## 📦 Android पैकेजिंग के निर्देश (Packaging for Android)
-
-विस्तृत Android पैकेजिंग, Capacitor सेटअप, TWA (Trusted Web Activity) और Google Play Store के लिए साइन किया हुआ Android App Bundle (`.aab`) तैयार करने के लिए कृपया **`ANDROID_PACKAGING_GUIDE.md`** देखें।
